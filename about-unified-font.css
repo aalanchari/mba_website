@@ -1,0 +1,7 @@
+/* Ensures about section text and list use the same font and size */
+.about-unified-font, .about-unified-font p, .about-unified-font ul, .about-unified-font li {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 1.15rem;
+    color: #222;
+    line-height: 1.6;
+}

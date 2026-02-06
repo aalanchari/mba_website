@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Members Grid Demo</title>
+    <link rel="stylesheet" href="members.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <img src="images/mba-logo.png" alt="MBA Logo" style="height:48px;width:auto;vertical-align:middle;margin-right:1rem;" />
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+            <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+            <li class="nav-item"><a href="#team" class="nav-link">Team</a></li>
+            <li class="nav-item"><a href="#events" class="nav-link">Events</a></li>
+            <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+            <li class="nav-item"><a href="professional.html" class="nav-link">Professional</a></li>
+            <li class="nav-item"><a href="sponsors.html" class="nav-link">Sponsors</a></li>
+            <li class="nav-item"><a href="spotlight.html" class="nav-link">Spotlight</a></li>
+        </ul>
+          <ul class="nav-menu nav-menu-right">
+          </ul>
+          <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+      </div>
+    </nav>
+    <script src="script.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',()=>{if(typeof setupAdminLoginLogic==='function'){setupAdminLoginLogic();}});</script>
+    <h1>Board Members</h1>
+    <div id="members-root"></div>
+
+    <!--
+      The TypeScript module lives at src/members.ts. To use the TS module directly,
+      compile it with `tsc` into `dist/members.js` and include that script.
+
+      Quick compile steps:
+      npm install -D typescript
+      npx tsc --init
+      npx tsc src/members.ts --outDir dist
+
+      Then add: <script type="module" src="dist/members.js"></script>
+    -->
+
+    <!-- Use the compiled TypeScript module for members -->
+    <script type="module" src="dist/members.js"></script>
+  </body>
+</html>
