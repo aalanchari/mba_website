@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MBA — Corporate & Investor Contact</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body { font-family: system-ui, -apple-system, Arial, sans-serif; padding: 24px; }
+    .container{ max-width:800px; margin:0 auto }
+    label{ display:block; margin-top:12px }
+    input,textarea,select{ width:100%; padding:8px; box-sizing:border-box }
+    button{ margin-top:12px; padding:10px 16px }
+    .notice{ margin-top:12px; color:green }
+    .error{ color:darkred }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <img src="images/MBA-white-logo.png" alt="MBA Logo" class="mba-white-logo" />
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+        <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+        <li class="nav-item"><a href="#team" class="nav-link">Team</a></li>
+        <li class="nav-item"><a href="#events" class="nav-link">Events</a></li>
+        <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+        <li class="nav-item"><a href="professional.html" class="nav-link">Professional</a></li>
+        <li class="nav-item"><a href="sponsors.html" class="nav-link">Sponsors</a></li>
+        <li class="nav-item"><a href="spotlight.html" class="nav-link">Spotlight</a></li>
+      </ul>
+      <ul class="nav-menu nav-menu-right">
+      </ul>
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+  <script src="script.js"></script>
+  <script>document.addEventListener('DOMContentLoaded',()=>{if(typeof setupAdminLoginLogic==='function'){setupAdminLoginLogic();}});</script>
+  <div class="container">
+    <h1>Corporate & Investor Information Form</h1>
+    <p>Please complete this form to submit partnership or investment interest directly to Prof. James Young.</p>
+
+    <form id="corpForm">
+      <label>Type
+        <select name="type" required>
+          <option value="Corporation">Corporation</option>
+          <option value="Investor">Investor</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+
+      <label>Company/Organization Name
+        <input name="company" type="text" required />
+      </label>
+
+      <label>Contact Name
+        <input name="contactName" type="text" required />
+      </label>
+
+      <label>Contact Email
+        <input name="email" type="email" required />
+      </label>
+
+      <label>Contact Phone
+        <input name="phone" type="tel" />
+      </label>
+
+      <label>Message / Details
+        <textarea name="message" rows="6" placeholder="Brief description of interest, available opportunities, or questions"></textarea>
+      </label>
+
+      <button type="submit">Submit to Prof. James Young</button>
+    </form>
+
+    <div id="status" class="notice" aria-live="polite"></div>
+
+    <p style="margin-top:18px">If you prefer, open your email client: <a id="mailtoLink" href="#">Send via email</a>.</p>
+  </div>
+
+  <script>
+    const form = document.getElementById('corpForm');
+    const status = document.getElementById('status');
+    const mailtoLink = document.getElementById('mailtoLink');
+
+    function buildMailto(data){
+      const to = 'james.young1@morehouse.edu';
+      const subject = encodeURIComponent(`${data.type} submission — ${data.company}`);
+      let body = `Company: ${data.company}%0D%0AContact: ${data.contactName}%0D%0AEmail: ${data.email}%0D%0APhone: ${data.phone || ''}%0D%0A%0D%0A${data.message || ''}`;
+      return `mailto:${to}?subject=${subject}&body=${body}`;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = '';
+      const fd = new FormData(form);
+      const data = Object.fromEntries(fd.entries());
+      try{
+        const res = await fetch('/api/corporate-contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const j = await res.json();
+        if (res.ok && j.success) {
+          status.className = 'notice';
+          status.textContent = 'Submission received. Thank you — Prof. Young will be notified.';
+        } else {
+          status.className = 'error';
+          status.textContent = j.error || j.message || 'Submission failed. Try sending via email.';
+        }
+      } catch (err){
+        status.className = 'error';
+        status.textContent = 'Network error. Try sending via email.';
+      }
+    });
+
+    // Update mailto link live for fallback
+    form.addEventListener('input', ()=>{
+      const fd = new FormData(form);
+      const data = Object.fromEntries(fd.entries());
+      mailtoLink.href = buildMailto(data);
+      mailtoLink.textContent = 'Send via email to Prof. James Young';
+    });
+
+    // initialize mailto
+    form.dispatchEvent(new Event('input'));
+  </script>
+</body>
+</html>

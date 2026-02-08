@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1766282345001",
+    "title": "brunch",
+    "start": " 2025-29-12",
+    "end": null,
+    "allDay": false,
+    "description": ""
+  },
+  {
+    "id": "1766283070712",
+    "title": "dinner",
+    "start": "12-29-2025",
+    "end": "9pm",
+    "allDay": true,
+    "description": ""
+  },
+  {
+    "id": "1767649395223",
+    "title": "skate",
+    "start": "2026-01-09T06:00:00.000Z",
+    "end": null,
+    "allDay": false,
+    "description": ""
+  },
+  {
+    "id": "1769563420070",
+    "title": "lunch",
+    "start": "2026-01-30T22:00:00.000Z",
+    "end": "2026-01-30T23:00:00.000Z",
+    "allDay": false,
+    "description": "Chivers"
+  }
+]

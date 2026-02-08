@@ -1,0 +1,21 @@
+[
+  {
+    "name": "John Doe",
+    "title": "From Intern to Entrepreneur",
+    "story": "John started as an intern at a local startup and now runs his own business, inspiring fellow MBA students to pursue their dreams.",
+    "image": "images/john.jpg"
+  },
+  {
+    "name": "Jane Smith",
+    "title": "Community Impact Leader",
+    "story": "Jane led a community project that provided financial literacy workshops to Atlanta youth, making a lasting impact.",
+    "image": "images/jane.jpg"
+  },
+  {
+    "id": "1770342627864",
+    "name": "Aalan Chari",
+    "title": "AI Intern",
+    "story": "Aalan Chari has officially accepted an offer with Stats Perform as an AI Intern after successfully completing a course with the company through Morehouse College. Through the program, he strengthened his skills in artificial intelligence and applied technology while gaining valuable industry experience. He looks forward to continuing his growth and contributing to innovative AI solutions with the Stats Perform team.",
+    "image": "images/uploads/Professional Headshot-1770342627858.jpg"
+  }
+]

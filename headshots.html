@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MBA — Headshots</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>body{font-family:system-ui, -apple-system, Arial; padding:20px; max-width:900px;margin:0 auto} .grid{display:flex;flex-wrap:wrap;gap:12px} .card{width:150px;text-align:center} img{width:150px;height:150px;object-fit:cover;border-radius:6px}</style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <img src="images/MBA-white-logo.png" alt="MBA Logo" class="mba-white-logo" />
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+        <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+        <li class="nav-item"><a href="#team" class="nav-link">Team</a></li>
+        <li class="nav-item"><a href="#events" class="nav-link">Events</a></li>
+        <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+        <li class="nav-item"><a href="professional.html" class="nav-link">Professional</a></li>
+        <li class="nav-item"><a href="sponsors.html" class="nav-link">Sponsors</a></li>
+        <li class="nav-item"><a href="spotlight.html" class="nav-link">Spotlight</a></li>
+      </ul>
+      <ul class="nav-menu nav-menu-right">
+      </ul>
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+  <script src="script.js"></script>
+  <script>document.addEventListener('DOMContentLoaded',()=>{if(typeof setupAdminLoginLogic==='function'){setupAdminLoginLogic();}});</script>
+  <h1>MBA Headshots</h1>
+  <p>This page lists headshots and allows uploading new ones. If you don't have images yet, you can upload later.</p>
+
+  <div>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label>Choose image to upload (JPEG/PNG)
+        <input id="fileInput" name="headshot" type="file" accept="image/*" required />
+      </label>
+      <label>Person Name
+        <input name="name" required />
+      </label>
+      <button type="submit">Upload Headshot</button>
+    </form>
+    <div id="uploadStatus" style="margin-top:10px"></div>
+  </div>
+
+  <h2 style="margin-top:18px">Current headshots</h2>
+
+  <!-- Pyramid layout: Ronald & Kael top, rest below -->
+  <div id="pyramid-gallery">
+    <div id="top-row"></div>
+    <div id="gallery" class="grid"></div>
+  </div>
+
+  <script>
+
+    async function loadGallery(){
+      const g = document.getElementById('gallery');
+      const top = document.getElementById('top-row');
+      g.innerHTML = 'Loading...';
+      top.innerHTML = '';
+      try{
+        const res = await fetch('/api/headshots');
+        const list = await res.json();
+        if(!Array.isArray(list)) { g.textContent = 'No headshots found.'; return; }
+        // Find Ronald and Kael (case-insensitive)
+        const topMembers = [];
+        const rest = [];
+        list.forEach(item => {
+          const name = (item.name || '').toLowerCase();
+          if(name.includes('ronald')) topMembers[0] = item;
+          else if(name.includes('kael')) topMembers[1] = item;
+          else rest.push(item);
+        });
+        // Render top row
+        top.style.display = 'flex';
+        top.style.justifyContent = 'center';
+        top.style.gap = '32px';
+        top.style.marginBottom = '24px';
+        top.style.background = '#f5f5f5';
+        top.style.borderRadius = '12px';
+        top.style.padding = '18px 0 12px 0';
+        top.style.border = '2px solid #8C1D40';
+        topMembers.forEach(member => {
+          if(member) {
+            const d = document.createElement('div'); d.className='card';
+            d.style.boxShadow = '0 2px 12px #8C1D4040';
+            d.style.background = '#fff';
+            d.style.border = '1.5px solid #8C1D40';
+            const img = document.createElement('img'); img.src = member.url; img.alt = member.name || '';
+            const p = document.createElement('div'); p.textContent = member.name || '';
+            d.appendChild(img); d.appendChild(p); top.appendChild(d);
+          }
+        });
+        // Render rest
+        g.innerHTML = '';
+        rest.forEach(item=>{
+          const d = document.createElement('div'); d.className='card';
+          const img = document.createElement('img'); img.src = item.url; img.alt = item.name || '';
+          const p = document.createElement('div'); p.textContent = item.name || '';
+          d.appendChild(img); d.appendChild(p); g.appendChild(d);
+        });
+      }catch(err){ g.textContent = 'Failed to load headshots.' }
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const f = e.target.headshot.files[0];
+      if(!f){ document.getElementById('uploadStatus').textContent='Choose a file.'; return; }
+      const fd = new FormData(); fd.append('headshot', f); fd.append('name', e.target.name.value);
+      try{
+        const res = await fetch('/api/headshots/upload',{method:'POST', body: fd});
+        const j = await res.json();
+        document.getElementById('uploadStatus').textContent = j.message || (res.ok? 'Uploaded' : 'Upload failed');
+        if(res.ok) loadGallery();
+      }catch(err){ document.getElementById('uploadStatus').textContent='Upload error'; }
+    });
+
+    loadGallery();
+  </script>
+</body>
+</html>

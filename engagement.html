@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MBA — Corporate Engagement Questionnaire</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>body{font-family:system-ui, -apple-system, Arial; padding:20px; max-width:900px;margin:0 auto} label{display:block;margin-top:10px} input,textarea,select{width:100%;box-sizing:border-box;padding:8px} button{margin-top:12px;padding:10px 14px}</style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <img src="images/MBA-white-logo.png" alt="MBA Logo" class="mba-white-logo" />
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+        <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+        <li class="nav-item"><a href="#team" class="nav-link">Team</a></li>
+        <li class="nav-item"><a href="#events" class="nav-link">Events</a></li>
+        <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+        <li class="nav-item"><a href="professional.html" class="nav-link">Professional</a></li>
+        <li class="nav-item"><a href="sponsors.html" class="nav-link">Sponsors</a></li>
+        <li class="nav-item"><a href="spotlight.html" class="nav-link">Spotlight</a></li>
+      </ul>
+      <ul class="nav-menu nav-menu-right">
+      </ul>
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+  <script src="script.js"></script>
+  <script>document.addEventListener('DOMContentLoaded',()=>{if(typeof setupAdminLoginLogic==='function'){setupAdminLoginLogic();}});</script>
+  <h1>Employer Corporate Engagement Questionnaire</h1>
+  <p>Complete this so we can understand opportunities to partner around student success. For questions contact Prof. James Young at <a href="mailto:james.young1@morehouse.edu">james.young1@morehouse.edu</a>.</p>
+
+  <form id="engageForm">
+    <label>Company Name
+      <input name="company" required />
+    </label>
+
+    <label>Primary Contact Name and Title
+      <input name="contactName" required />
+    </label>
+
+    <label>Email
+      <input name="email" type="email" required />
+    </label>
+
+    <label>Phone
+      <input name="phone" type="tel" />
+    </label>
+
+    <label>Type of Engagement (select any that apply)
+      <select name="engagementType">
+        <option>Internships</option>
+        <option>Full-time hiring</option>
+        <option>Projects/Capstone</option>
+        <option>Sponsorship</option>
+        <option>Other</option>
+      </select>
+    </label>
+
+    <label>Brief description of opportunities / needs
+      <textarea name="description" rows="6"></textarea>
+    </label>
+
+    <button type="submit">Submit Questionnaire</button>
+  </form>
+
+  <div id="status" aria-live="polite" style="margin-top:12px"></div>
+
+  <script>
+    document.getElementById('engageForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const data = Object.fromEntries(fd.entries());
+      const status = document.getElementById('status');
+      status.textContent = '';
+      try{
+        const res = await fetch('/api/engagement', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+        const j = await res.json();
+        if(res.ok) status.textContent = j.message || 'Submission received. Thank you.';
+        else status.textContent = j.error || 'Submission failed.';
+      }catch(err){ status.textContent = 'Network error when submitting.' }
+    });
+  </script>
+</body>
+</html>

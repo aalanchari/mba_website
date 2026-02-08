@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student Spotlight Stories | MBA Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .edit-spotlight-section { max-width: 600px; margin: 100px auto 0 auto; background: var(--white); border-radius: 16px; box-shadow: 0 4px 24px rgba(140,29,64,0.10); padding: 2.5rem 2rem; }
+        .edit-spotlight-section h1 { color: var(--primary-color); margin-bottom: 1.5rem; }
+        .edit-spotlight-form label { display: block; margin-top: 1rem; font-weight: 500; color: var(--primary-color-dark); }
+        .edit-spotlight-form input, .edit-spotlight-form textarea { width: 100%; padding: 0.5rem; margin-top: 0.3rem; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 1rem; }
+        .edit-spotlight-form button { background: var(--primary-color); color: var(--white); border: none; padding: 0.7rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+        .edit-spotlight-form button:hover { background: var(--primary-color-dark); }
+        .spotlight-preview { margin-top: 2rem; }
+        .spotlight-preview .spotlight-card { margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="images/MBA-white-logo.png" alt="MBA Logo" style="height:48px;width:auto;vertical-align:middle;margin-right:1rem;" />
+            </div>
+            <ul class="nav-menu">
+              <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+              <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+              <li class="nav-item"><a href="#team" class="nav-link">Team</a></li>
+              <li class="nav-item"><a href="#events" class="nav-link">Events</a></li>
+              <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+              <li class="nav-item"><a href="professional.html" class="nav-link">Professional</a></li>
+              <li class="nav-item"><a href="sponsors.html" class="nav-link">Sponsors</a></li>
+              <li class="nav-item"><a href="spotlight.html" class="nav-link">Spotlight</a></li>
+            </ul>
+        </div>
+    </nav>
+    <main>
+        <section class="edit-spotlight-section">
+            <h1>Edit Student Spotlight Stories</h1>
+            <form class="edit-spotlight-form" id="spotlightForm">
+                <label>Name</label>
+                <input type="text" id="name" required>
+                <label>Title</label>
+                <input type="text" id="title" required>
+                <label>Story</label>
+                <textarea id="story" rows="4" required></textarea>
+                <label>Image URL (relative to project, e.g. images/john.jpg)</label>
+                <input type="text" id="image" required>
+                <button type="submit">Add Story</button>
+            </form>
+            <div class="spotlight-preview" id="spotlightPreview"></div>
+        </section>
+    </main>
+    <footer class="footer">&copy; 2026 Morehouse Business Association. All rights reserved. — <a href="/admin.html" style="color:inherit; text-decoration:underline;">Admin</a></footer>
+    <script src="script.js"></script>
+      <script>document.addEventListener('DOMContentLoaded',()=>{if(typeof setupAdminLoginLogic==='function'){setupAdminLoginLogic();}});</script>
+    <script>
+    // Load and preview stories
+    function loadStories() {
+      fetch('spotlight-stories.json')
+        .then(res => res.json())
+        .then(stories => {
+          window.spotlightStories = stories;
+          renderPreview();
+        });
+    }
+    function renderPreview() {
+      const preview = document.getElementById('spotlightPreview');
+      preview.innerHTML = window.spotlightStories.map(story => `
+        <div class='spotlight-card'>
+          <img src='${story.image}' alt='${story.name}'>
+          <div class='name'>${story.name}</div>
+          <div class='title'>${story.title}</div>
+          <div class='story'>${story.story}</div>
+        </div>
+      `).join('');
+    }
+    document.getElementById('spotlightForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const title = document.getElementById('title').value.trim();
+      const story = document.getElementById('story').value.trim();
+      const image = document.getElementById('image').value.trim();
+      if (name && title && story && image) {
+        window.spotlightStories.push({ name, title, story, image });
+        renderPreview();
+        // Save to file (requires backend API)
+        fetch('spotlight-stories.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(window.spotlightStories)
+        }).then(() => {
+          alert('Story added!');
+          document.getElementById('spotlightForm').reset();
+        }).catch(() => {
+          alert('Story previewed, but saving requires backend support.');
+        });
+      }
+    });
+    loadStories();
+    </script>
+</body>
+</html>

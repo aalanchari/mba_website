@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Spotlight Stories | MBA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="images/MBA-white-logo.png" alt="MBA Logo" class="mba-white-logo" />
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="index.html#home" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="index.html#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="index.html#team" class="nav-link">Team</a></li>
+                <li class="nav-item"><a href="index.html#events" class="nav-link">Events</a></li>
+                <li class="nav-item"><a href="index.html#contact" class="nav-link">Contact</a></li>
+                <li class="nav-item"><a href="professional.html" class="nav-link">Career</a></li>
+                <li class="nav-item"><a href="sponsors.html" class="nav-link">Sponsors</a></li>
+                <li class="nav-item"><a href="spotlight.html" class="nav-link active">Spotlight</a></li>
+            </ul>
+                <ul class="nav-menu nav-menu-right">
+                    <li class="nav-item">
+                        <button id="admin-login-btn" style="background:#68142f;color:#68142f;font-weight:700;border:none;padding:0.6em 1.5em;border-radius:8px;box-shadow:0 2px 8px rgba(140,29,64,0.10);cursor:pointer;">Admin Login</button>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+    </nav>
+    <main>
+        <section class="sponsors-section">
+            <h1>Student Spotlight Stories</h1>
+            <p>Celebrating the achievements, journeys, and impact of our MBA students. Read their stories below!</p>
+            <div id="spotlight-stories" class="spotlight-grid"></div>
+        </section>
+    </main>
+    <footer class="footer">&copy; 2026 Morehouse Business Association. All rights reserved. — <a href="/admin.html" style="color:inherit; text-decoration:underline;">Admin</a></footer>
+                <div id="admin-login-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:3000;align-items:center;justify-content:center;">
+                    <div style="background:#fff;padding:2.5rem 2rem 2rem 2rem;border-radius:14px;max-width:350px;width:90vw;box-shadow:0 4px 24px rgba(140,29,64,0.18);text-align:center;">
+                        <h2 style="color:#8C1D40;margin-bottom:1.2rem;">Admin Login</h2>
+                        <form id="admin-login-form">
+                            <input type="text" id="admin-username" placeholder="Username" required style="width:100%;margin-bottom:1rem;padding:0.6em;border-radius:6px;border:1px solid #ccc;">
+                            <input type="password" id="admin-password" placeholder="Password" required style="width:100%;margin-bottom:1.2rem;padding:0.6em;border-radius:6px;border:1px solid #ccc;">
+                            <button type="submit" style="background:#8C1D40;color:#fff;font-weight:700;border:none;padding:0.6em 1.5em;border-radius:8px;cursor:pointer;">Login</button>
+                            <button type="button" id="admin-login-cancel" style="margin-left:1em;background:#ccc;color:#222;font-weight:600;border:none;padding:0.6em 1.2em;border-radius:8px;cursor:pointer;">Cancel</button>
+                        </form>
+                        <div id="admin-login-error" style="color:#b71c1c;margin-top:1em;font-size:1em;"></div>
+                    </div>
+                </div>
+                <script src="script.js"></script>
+                <div id="admin-controls" style="margin-top:2rem;text-align:center;"></div>
+                <script>
+
+                let stories = [];
+                let isAdmin = false;
+                let token = null;
+                // Use global admin login logic from script.js
+                document.addEventListener('DOMContentLoaded', () => {
+                    const admin = setupAdminLoginLogic((newToken) => {
+                        token = newToken;
+                        isAdmin = true;
+                        fetchStories();
+                    });
+                    token = admin.getToken();
+                    isAdmin = admin.isAdmin();
+                    fetchStories();
+                });
+
+                // Admin login button/modal logic
+                function updateAdminLoginBtn() {
+                    const btn = document.getElementById('admin-login-btn');
+                    btn.style.display = isAdmin ? 'none' : 'block';
+                }
+                updateAdminLoginBtn();
+                document.getElementById('admin-login-btn').onclick = function() {
+                    document.getElementById('admin-login-modal').style.display = 'flex';
+                };
+                document.getElementById('admin-login-cancel').onclick = function() {
+                    document.getElementById('admin-login-modal').style.display = 'none';
+                    document.getElementById('admin-login-error').textContent = '';
+                };
+                document.getElementById('admin-login-form').onsubmit = function(e) {
+                    e.preventDefault();
+                    const username = document.getElementById('admin-username').value.trim();
+                    const password = document.getElementById('admin-password').value.trim();
+                    fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.token) {
+                            localStorage.setItem('mba_token', data.token);
+                            token = data.token;
+                            isAdmin = true;
+                            document.getElementById('admin-login-modal').style.display = 'none';
+                            document.getElementById('admin-login-error').textContent = '';
+                            updateAdminLoginBtn();
+                            fetchStories();
+                        } else {
+                            document.getElementById('admin-login-error').textContent = data.error || 'Login failed.';
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('admin-login-error').textContent = 'Login failed.';
+                    });
+                };
+
+        function fetchStories() {
+            fetch('/api/spotlight')
+                .then(res => res.json())
+                .then(data => {
+                    stories = data;
+                    renderStories();
+                    renderAdminControls();
+                });
+        }
+
+        function renderStories() {
+            const grid = document.getElementById('spotlight-stories');
+            grid.innerHTML = stories.map(story => `
+                <div class="spotlight-card" data-id="${story.id || ''}">
+                    <img src="${story.image}" alt="${story.name}">
+                    <div class="name">${story.name}</div>
+                    <div class="title">${story.title}</div>
+                    <div class="story">${story.story}</div>
+                    ${isAdmin ? `<button class="delete-story-btn" data-id="${story.id}" style="margin-top:0.7em;background:#b71c1c;color:#fff;border:none;padding:0.4em 1.2em;border-radius:6px;cursor:pointer;">Delete</button>` : ''}
+                </div>
+            `).join('');
+            if (isAdmin) {
+                document.querySelectorAll('.delete-story-btn').forEach(btn => {
+                    btn.onclick = function() {
+                        if (confirm('Delete this story?')) {
+                            fetch(`/api/spotlight/${btn.dataset.id}`, {
+                                method: 'DELETE',
+                                headers: { 'x-admin-token': token }
+                            })
+                            .then(res => res.json())
+                            .then(() => fetchStories());
+                        }
+                    };
+                });
+            }
+        }
+
+        function renderAdminControls() {
+            const adminDiv = document.getElementById('admin-controls');
+            if (!isAdmin) { adminDiv.innerHTML = ''; return; }
+            adminDiv.innerHTML = `<button id="showAddStory" style="background:#ffd700;color:#8C1D40;border:2px solid #8C1D40;padding:0.7rem 2rem;border-radius:8px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(140,29,64,0.10);font-size:1.1rem;outline:3px solid #fff;">Add New Story</button>
+            <form id="addStoryForm" style="display:none;margin-top:2rem;text-align:left;max-width:400px;margin-left:auto;margin-right:auto;" enctype="multipart/form-data">
+                <label>Name</label>
+                <input type="text" id="newName" required>
+                <label>Title</label>
+                <input type="text" id="newTitle" required>
+                <label>Story</label>
+                <textarea id="newStory" rows="3" required></textarea>
+                <label>Image File (JPG, PNG, etc.)</label>
+                <input type="file" id="newImageFile" accept="image/*" required>
+                <button type="submit" style="background:var(--primary-color);color:var(--white);border:none;padding:0.7rem 2rem;border-radius:8px;font-weight:600;cursor:pointer;margin-top:0.5rem;">Save Story</button>
+            </form>`;
+            document.getElementById('showAddStory').onclick = function() {
+                document.getElementById('addStoryForm').style.display = 'block';
+                this.style.display = 'none';
+            };
+            document.getElementById('addStoryForm').onsubmit = function(e) {
+                e.preventDefault();
+                const name = document.getElementById('newName').value.trim();
+                const title = document.getElementById('newTitle').value.trim();
+                const story = document.getElementById('newStory').value.trim();
+                const imageFile = document.getElementById('newImageFile').files[0];
+                if (name && title && story && imageFile) {
+                    const formData = new FormData();
+                    formData.append('name', name);
+                    formData.append('title', title);
+                    formData.append('story', story);
+                    formData.append('image', imageFile);
+                    fetch('/api/spotlight', {
+                        method: 'POST',
+                        headers: {
+                            'x-admin-token': token
+                        },
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(() => {
+                        fetchStories();
+                        document.getElementById('addStoryForm').reset();
+                        document.getElementById('addStoryForm').style.display = 'none';
+                        document.getElementById('showAddStory').style.display = 'inline-block';
+                    });
+                }
+            };
+        }
+
+        fetchStories();
+        </script>
+</body>
+</html>

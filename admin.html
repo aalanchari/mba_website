@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MBA Admin</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-wrap { max-width:900px; margin:7rem auto 4rem auto; padding:1rem; }
+    .login, .panel { background:#fff; padding:1.5rem; border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.08); }
+    .hidden { display:none; }
+    label { display:block; margin:0.5rem 0 0.25rem; }
+    input, textarea { width:100%; padding:0.75rem; border-radius:6px; border:1px solid #ddd; }
+    button { margin-top:0.75rem; padding:0.75rem 1rem; background:var(--primary-color); color:var(--white); border:none; border-radius:6px; cursor:pointer; }
+    .events-list { margin-top:1rem; }
+    .event-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid #eee; }
+    .danger { background:#b71c2b; }
+  </style>
+</head>
+<body>
+    <script src="script.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',()=>{if(typeof setupAdminLoginLogic==='function'){setupAdminLoginLogic();}});</script>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="images/MBA-white-logo.png" alt="MBA Logo" class="mba-white-logo" />
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="#team" class="nav-link">Team</a></li>
+                <li class="nav-item"><a href="#events" class="nav-link">Events</a></li>
+                <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+                <li class="nav-item"><a href="professional.html" class="nav-link">Professional</a></li>
+                <li class="nav-item"><a href="sponsors.html" class="nav-link">Sponsors</a></li>
+                <li class="nav-item"><a href="spotlight.html" class="nav-link">Spotlight</a></li>
+            </ul>
+            <ul class="nav-menu nav-menu-right">
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+  <div class="admin-wrap">
+    <h1>Morehouse Business Association — Admin</h1>
+
+    <div id="loginBox" class="login">
+      <h2>Admin Login</h2>
+      <label for="username">Username</label>
+      <input id="username" type="text" placeholder="admin username">
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="password">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="loginBtn">Log in</button>
+        <button id="backFromLogin" style="background:#eee;color:#222;padding:0.6rem 0.8rem;border-radius:6px;border:none;">Back to site</button>
+      </div>
+      <p id="loginMsg" style="color:#b71c2b"></p>
+    </div>
+
+    <div id="panel" class="panel hidden">
+      <h2>Event Management</h2>
+      <label>Title</label>
+      <input id="evTitle" type="text">
+      <label>Start (ISO)</label>
+      <input id="evStart" type="text" placeholder="2025-12-31 or 2025-12-31T18:00">
+      <label>End (optional)</label>
+      <input id="evEnd" type="text">
+      <label><input id="evAllDay" type="checkbox"> All day</label>
+      <button id="addEventBtn">Add Event</button>
+      <div style="float:right; display:flex; gap:8px;">
+        <button id="backBtn" style="background:#eee;color:#222;padding:0.6rem 0.8rem;border-radius:6px;border:none;">Back to site</button>
+        <button id="logoutBtn" class="danger">Logout</button>
+      </div>
+
+      <div class="events-list" id="eventsList"></div>
+    </div>
+  </div>
+
+<script>
+async function api(path, options={}){
+  const token = localStorage.getItem('mba_token');
+  options.headers = options.headers || {};
+  options.headers['Content-Type'] = 'application/json';
+  if (token) options.headers['x-admin-token'] = token;
+  const res = await fetch(path, options);
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok) throw data;
+  return data;
+}
+
+function showLogin(show){ document.getElementById('loginBox').classList.toggle('hidden', !show); }
+function showPanel(show){ document.getElementById('panel').classList.toggle('hidden', !show); }
+
+// handle redirect param so user can be sent back to the site after login
+const urlParams = new URLSearchParams(window.location.search);
+const redirectUrl = urlParams.get('redirect');
+
+
+async function refreshEvents(){
+  try{
+    const events = await api('/api/events', { method:'GET' });
+    const list = document.getElementById('eventsList');
+    list.innerHTML = '';
+    events.forEach(e => {
+      const row = document.createElement('div'); row.className='event-row';
+      row.innerHTML = `<div><strong>${e.title}</strong><br><small>${e.start}${e.end?(' — '+e.end):''}</small></div>`;
+      const del = document.createElement('button'); del.textContent='Delete'; del.style.background='#c62828'; del.style.color='#fff';
+      del.addEventListener('click', async ()=>{
+        if (!confirm('Delete this event?')) return; try{ await api('/api/events/'+e.id,{ method:'DELETE' }); refreshEvents(); }catch(err){ alert(err.error||err); }
+      });
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+  }catch(err){ console.error(err); }
+}
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const u = document.getElementById('username').value;
+  const p = document.getElementById('password').value;
+  try{
+    const res = await fetch('/api/login',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ username:u, password:p }) });
+    const data = await res.json();
+    if (!res.ok) { document.getElementById('loginMsg').textContent = data.error || 'Login failed'; return; }
+    localStorage.setItem('mba_token', data.token);
+    // if we were given a redirect, go back to that URL so the user can continue where they started
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+      return;
+    }
+    showLogin(false); showPanel(true); refreshEvents();
+  }catch(err){ document.getElementById('loginMsg').textContent = err.error||'Login failed'; }
+});
+
+document.getElementById('backFromLogin').addEventListener('click', ()=>{
+  if (redirectUrl) window.location.href = redirectUrl; else window.location.href = '/';
+});
+
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  if (redirectUrl) window.location.href = redirectUrl; else window.location.href = '/';
+});
+
+document.getElementById('addEventBtn').addEventListener('click', async ()=>{
+  const title = document.getElementById('evTitle').value;
+  const start = document.getElementById('evStart').value;
+  const end = document.getElementById('evEnd').value;
+  const allDay = document.getElementById('evAllDay').checked;
+  if(!title||!start) return alert('Title and start required');
+  try{
+    await api('/api/events',{ method:'POST', body: JSON.stringify({ title, start, end: end||null, allDay }) });
+    document.getElementById('evTitle').value=''; document.getElementById('evStart').value=''; document.getElementById('evEnd').value=''; document.getElementById('evAllDay').checked=false;
+    refreshEvents(); alert('Event added');
+  }catch(err){ alert(err.error||'Error adding event'); }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  const token = localStorage.getItem('mba_token');
+  if (!token) return; try{ await fetch('/api/logout',{ method:'POST', headers:{ 'x-admin-token': token } }); }catch(e){}
+  localStorage.removeItem('mba_token'); showLogin(true); showPanel(false);
+});
+
+// On load: if token present, either redirect back (when a redirect param exists) or show panel
+const existingToken = localStorage.getItem('mba_token');
+if (existingToken) {
+  if (redirectUrl) {
+    // return to caller page (token assumed valid); the caller will use token for its action
+    window.location.href = redirectUrl;
+  } else {
+    showLogin(false); showPanel(true); refreshEvents();
+  }
+}
+</script>
+<script src="script.js"></script>
+</body>
+</html>
