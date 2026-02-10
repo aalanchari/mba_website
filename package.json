@@ -4,13 +4,8 @@
   "description": "Morehouse College Business Association Website",
   "main": "index.html",
   "scripts": {
-<<<<<<< HEAD
     "dev": "echo 'Static site: open index.html directly or use a static server'",
     "start": "echo 'Static site: open index.html directly or use a static server'",
-=======
-    "dev": "node server.js",
-    "start": "node server.js",
->>>>>>> ed51e439fa2a463a2ddcc1945f8c6692f527486c
     "install-deps": "npm install"
   },
   "keywords": [
@@ -25,10 +20,7 @@
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.1.4",
-<<<<<<< HEAD
-=======
     "express": "^4.18.2",
->>>>>>> ed51e439fa2a463a2ddcc1945f8c6692f527486c
     "jsonwebtoken": "^9.0.3",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.3",
