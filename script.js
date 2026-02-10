@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const footer = document.querySelector('.footer');
     if (footer) {
         const currentYear = new Date().getFullYear();
-        footer.textContent = `© ${currentYear} Morehouse College Business Association. All rights reserved.`;
+        footer.textContent = `© ${currentYear} Morehouse Business Association. All rights reserved.`;
     }
 
     // ===== Calendar integration (FullCalendar) =====
