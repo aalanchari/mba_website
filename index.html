@@ -201,6 +201,11 @@
         </div>
     </footer>
 
+    <!-- set flag before your script runs -->
+    <script>
+    window.API_EVENTS_ENABLED = false; // or false if the API isn't ready yet
+    </script>
+
     <script src="script.js"></script>
             <script>document.addEventListener('DOMContentLoaded',()=>{if(typeof setupAdminLoginLogic==='function'){setupAdminLoginLogic();}});</script>
         <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>

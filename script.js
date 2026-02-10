@@ -150,13 +150,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             events: function(info, successCallback, failureCallback) {
-                fetch('/api/events')
-                    .then(res => res.json())
-                    .then(events => {
-                        const fcEvents = events.map(e => ({ id: e.id, title: e.title, start: e.start, end: e.end, allDay: e.allDay, description: e.description }));
-                        successCallback(fcEvents);
-                    })
-                    .catch(err => failureCallback(err));
+                if (window.API_EVENTS_ENABLED) {
+                    fetch('/api/events')
+                        .then(res => res.json())
+                        .then(events => {
+                            const fcEvents = events.map(e => ({ id: e.id, title: e.title, start: e.start, end: e.end, allDay: e.allDay, description: e.description }));
+                            successCallback(fcEvents);
+                        })
+                        .catch(err => failureCallback(err));
+                } else {
+                    // API disabled → return empty array, no network request
+                    successCallback([]);
+                }
             },
             eventContent: function(arg) {
                 let title = arg.event.title;
